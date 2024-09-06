@@ -1,6 +1,7 @@
 import os
 from typing import List, Optional, Union
 from dataclasses import replace
+import time
 
 import ctranslate2
 import faster_whisper
@@ -217,7 +218,7 @@ class FasterWhisperPipeline(Pipeline):
     ) -> TranscriptionResult:
 
         # ================ function start time =================
-        start_transcribe = time.time()
+        start = time.time()
         # =======================================================
 
         if isinstance(audio, str):

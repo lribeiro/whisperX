@@ -218,7 +218,7 @@ class FasterWhisperPipeline(Pipeline):
     ) -> TranscriptionResult:
 
         # ================ function start time =================
-        start = time.time()
+        start_transcribe = time.time()
         # =======================================================
 
         if isinstance(audio, str):

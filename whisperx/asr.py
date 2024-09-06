@@ -468,6 +468,8 @@ def load_model(
         else:
             raise ValueError(f"Invalid vad_method: {vad_method}")
 
+
+
     return FasterWhisperPipeline(
         model=model,
         vad=vad_model,

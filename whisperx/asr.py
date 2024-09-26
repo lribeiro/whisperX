@@ -13,9 +13,8 @@ from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 
 from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
+import whisperx.vads
 from .types import SingleSegment, TranscriptionResult
-from .vad import VoiceActivitySegmentation, load_vad_model, merge_chunks
-
 
 def find_numeral_symbol_tokens(tokenizer):
     numeral_symbol_tokens = []
@@ -109,7 +108,7 @@ class FasterWhisperPipeline(Pipeline):
     def __init__(
         self,
         model: WhisperModel,
-        vad: VoiceActivitySegmentation,
+        vad,
         vad_params: dict,
         options: TranscriptionOptions,
         tokenizer: Optional[Tokenizer] = None,
@@ -467,10 +466,8 @@ def load_model(
             case "silero":
                 vad_model = whisperx.vads.Silero(**default_vad_options)
             case "pyannote" | _:
-                vad_model = whisperx.vads.Pyannote(
-            torch.device(device), use_auth_token=None, **default_vad_options
-        )
-                
+                vad_model = whisperx.vads.Pyannote(torch.device(device), use_auth_token=None, **default_vad_options)
+
     return FasterWhisperPipeline(
         model=model,
         vad=vad_model,

@@ -15,8 +15,6 @@ from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
 from .types import SingleSegment, TranscriptionResult
 from .vads import Vad, Silero, Pyannote
 from .types import SingleSegment, TranscriptionResult
-from .vad import VoiceActivitySegmentation, load_vad_model, merge_chunks
-
 
 def find_numeral_symbol_tokens(tokenizer):
     numeral_symbol_tokens = []
@@ -110,7 +108,7 @@ class FasterWhisperPipeline(Pipeline):
     def __init__(
         self,
         model: WhisperModel,
-        vad: VoiceActivitySegmentation,
+        vad,
         vad_params: dict,
         options: NamedTuple,
         tokenizer: Optional[Tokenizer] = None,
@@ -226,20 +224,16 @@ class FasterWhisperPipeline(Pipeline):
                 f1 = int(seg["start"] * SAMPLE_RATE)
                 f2 = int(seg["end"] * SAMPLE_RATE)
                 # print(f2-f1)
-                yield {"inputs": audio[f1:f2]}
+                yield {'inputs': audio[f1:f2]}
 
-        # ================ function start time =================
-        start_vad = time.time()
-        # =======================================================
-
-        # Pre-process audio and merge chunks as defined by the respective VAD child class
+        # Pre-process audio and merge chunks as defined by the respective VAD child class 
         # In case vad_model is manually assigned (see 'load_model') follow the functionality of pyannote toolkit
-        if issubclass(type(self.vad_model), Vad):
+        if issubclass(type(self.vad_model), whisperx.vads.Vad):
             waveform = self.vad_model.preprocess_audio(audio)
             merge_chunks =  self.vad_model.merge_chunks
         else:
-            waveform = Pyannote.preprocess_audio(audio)
-            merge_chunks = Pyannote.merge_chunks
+            waveform = whisperx.vads.Pyannote.preprocess_audio(audio)
+            merge_chunks = whisperx.vads.Pyannote.merge_chunks
 
         vad_segments = self.vad_model({"waveform": waveform, "sample_rate": SAMPLE_RATE})
         vad_segments = merge_chunks(

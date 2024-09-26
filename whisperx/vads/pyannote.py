@@ -29,11 +29,11 @@ def load_vad_model(device, vad_onset=0.500, vad_offset=0.363, use_auth_token=Non
         model_fp = os.path.abspath(model_fp)  # Ensure the path is absolute
     else:
         model_fp = os.path.abspath(model_fp)  # Ensure any provided path is absolute
-    
+
     # Check if the resolved model file exists
     if not os.path.exists(model_fp):
         raise FileNotFoundError(f"Model file not found at {model_fp}")
-    
+
     if os.path.exists(model_fp) and not os.path.isfile(model_fp):
         raise RuntimeError(f"{model_fp} exists and is not a regular file")
 

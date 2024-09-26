@@ -31,18 +31,18 @@ def load_vad_model(device, vad_onset=0.500, vad_offset=0.363, use_auth_token=Non
         model_fp = os.path.abspath(model_fp)  # Ensure the path is absolute
     else:
         model_fp = os.path.abspath(model_fp)  # Ensure any provided path is absolute
-    
+
     # Check if the resolved model file exists
     if not os.path.exists(model_fp):
         raise FileNotFoundError(f"Model file not found at {model_fp}")
-    
+
     if os.path.exists(model_fp) and not os.path.isfile(model_fp):
         raise RuntimeError(f"{model_fp} exists and is not a regular file")
 
     model_bytes = open(model_fp, "rb").read()
 
     vad_model = Model.from_pretrained(model_fp, use_auth_token=use_auth_token)
-    hyperparameters = {"onset": vad_onset, 
+    hyperparameters = {"onset": vad_onset,
                     "offset": vad_offset,
                     "min_duration_on": 0.1,
                     "min_duration_off": 0.1}

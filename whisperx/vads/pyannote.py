@@ -1,4 +1,5 @@
 import os
+import urllib
 from typing import Callable, Text, Union
 from typing import Optional
 
@@ -16,7 +17,7 @@ from whisperx.vads.vad import Vad
 from whisperx.log_utils import get_logger
 
 logger = get_logger(__name__)
-
+from tqdm import tqdm
 
 def load_vad_model(device, vad_onset=0.500, vad_offset=0.363, use_auth_token=None, model_fp=None):
     model_dir = torch.hub._get_torch_home()
@@ -37,8 +38,6 @@ def load_vad_model(device, vad_onset=0.500, vad_offset=0.363, use_auth_token=Non
 
     if os.path.exists(model_fp) and not os.path.isfile(model_fp):
         raise RuntimeError(f"{model_fp} exists and is not a regular file")
-
-    model_bytes = open(model_fp, "rb").read()
 
     vad_model = Model.from_pretrained(model_fp, use_auth_token=use_auth_token)
     hyperparameters = {"onset": vad_onset,
@@ -260,7 +259,7 @@ class Pyannote(Vad):
             segments_list.append(SegmentX(speech_turn.start, speech_turn.end, "UNKNOWN"))
 
         if len(segments_list) == 0:
-            logger.warning("No active speech found in audio")
+            print("No active speech found in audio")
             return []
         assert segments_list, "segments_list is empty."
         return Vad.merge_chunks(segments_list, chunk_size, onset, offset)

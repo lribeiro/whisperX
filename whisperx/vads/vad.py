@@ -54,4 +54,3 @@ class Vad:
         })
 
         return merged_segments
-

@@ -356,10 +356,11 @@ def load_model(
     vad_options: Optional[dict] = None,
     model: Optional[WhisperModel] = None,
     task="transcribe",
-    download_root: Optional[str] = None,
+    download_root=None,
     local_files_only=False,
     threads=4,
-) -> FasterWhisperPipeline:
+):
+
     """Load a Whisper model for inference.
     Args:
         whisper_arch: str - The name of the Whisper model to load.

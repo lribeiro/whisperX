@@ -359,12 +359,9 @@ def load_model(
     model: Optional[WhisperModel] = None,
     task="transcribe",
     download_root=None,
+    local_files_only=False,
     threads=4,
-    prnt_duration=False,
 ):
-    # ================ function start time =================
-    start = time.time()
-    # =======================================================
 
     """Load a Whisper model for inference.
     Args:
@@ -376,6 +373,7 @@ def load_model(
         language: str - The language of the model. (use English for now)
         model: Optional[WhisperModel] - The WhisperModel instance to use.
         download_root: Optional[str] - The root directory to download the model to.
+        local_files_only: bool - If `True`, avoid downloading the file and return the path to the local cached file if it exists.
         threads: int - The number of cpu threads to use per worker, e.g. will be multiplied by num workers.
     Returns:
         A Whisper pipeline.
@@ -384,14 +382,13 @@ def load_model(
     if whisper_arch.endswith(".en"):
         language = "en"
 
-    model = model or WhisperModel(
-        whisper_arch,
-        device=device,
-        device_index=device_index,
-        compute_type=compute_type,
-        download_root=download_root,
-        cpu_threads=threads,
-    )
+    model = model or WhisperModel(whisper_arch,
+                         device=device,
+                         device_index=device_index,
+                         compute_type=compute_type,
+                         download_root=download_root,
+                         local_files_only=local_files_only,
+                         cpu_threads=threads)
     if language is not None:
         tokenizer = faster_whisper.tokenizer.Tokenizer(
             model.hf_tokenizer,

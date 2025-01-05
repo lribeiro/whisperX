@@ -15,6 +15,14 @@ from whisperx.utils import LANGUAGES, TO_LANGUAGE_CODE, get_writer
 from whisperx.log_utils import get_logger
 
 logger = get_logger(__name__)
+from .utils import (
+    LANGUAGES,
+    TO_LANGUAGE_CODE,
+    get_writer,
+    optional_float,
+    optional_int,
+    str2bool,
+)
 
 
 def transcribe_task(args: dict, parser: argparse.ArgumentParser):
@@ -210,6 +218,7 @@ def transcribe_task(args: dict, parser: argparse.ArgumentParser):
         audio = load_audio(audio_path)
         # >> VAD & ASR
         logger.info("Performing transcription...")
+
         result: TranscriptionResult = model.transcribe(
             audio,
             batch_size=batch_size,

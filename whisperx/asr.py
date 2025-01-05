@@ -1,18 +1,21 @@
 import os
-from typing import List, Optional, Union
 from dataclasses import replace
 import time
+import warnings
+from typing import List, NamedTuple, Optional, Union
 
 import ctranslate2
 import faster_whisper
 import numpy as np
 import torch
 from faster_whisper.tokenizer import Tokenizer
-from faster_whisper.transcribe import (TranscriptionOptions,
-                                       get_ctranslate2_storage)
+from faster_whisper.transcribe import TranscriptionOptions, get_ctranslate2_storage
 from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 
+from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
+from whisperx.types import SingleSegment, TranscriptionResult
+from whisperx.vad import VoiceActivitySegmentation, load_vad_model, merge_chunks
 from whisperx.audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
 from whisperx.schema import SingleSegment, TranscriptionResult
 from whisperx.vads import Vad, Silero, Pyannote
@@ -113,8 +116,8 @@ class FasterWhisperPipeline(Pipeline):
 
     def __init__(
         self,
-        model: WhisperModel,
-        vad,
+        model: WhisperModel: WhisperModel,
+        vad: VoiceActivitySegmentation,
         vad_params: dict,
         options: NamedTuple,
         tokenizer: Optional[Tokenizer] = None,
@@ -352,16 +355,15 @@ def load_model(
     compute_type="float16",
     asr_options: Optional[dict] = None,
     language: Optional[str] = None,
-    vad_model: Optional[Vad]= None,
-    vad_method: Optional[str] = None,
+    vad_model: Optional[VoiceActivitySegmentation] = None,
+    vad_method: Optional[str] = "pyannote",
     vad_options: Optional[dict] = None,
     model: Optional[WhisperModel] = None,
     task="transcribe",
-    download_root=None,
+    download_root: Optional[str] = None,
     local_files_only=False,
     threads=4,
-):
-
+) -> FasterWhisperPipeline:
     """Load a Whisper model for inference.
     Args:
         whisper_arch: str - The name of the Whisper model to load.

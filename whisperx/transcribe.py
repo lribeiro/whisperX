@@ -10,6 +10,7 @@ from .alignment import align, load_align_model
 from .asr import load_model
 from .audio import load_audio
 from .diarize import DiarizationPipeline, assign_word_speakers
+from .types import AlignedTranscriptionResult, TranscriptionResult
 from .utils import (
     LANGUAGES,
     TO_LANGUAGE_CODE,
@@ -186,7 +187,13 @@ def cli():
         audio = load_audio(audio_path)
         # >> VAD & ASR
         print(">>Performing transcription...")
-        result = model.transcribe(audio, batch_size=batch_size, chunk_size=chunk_size, print_progress=print_progress, verbose=verbose)
+        result: TranscriptionResult = model.transcribe(
+            audio,
+            batch_size=batch_size,
+            chunk_size=chunk_size,
+            print_progress=print_progress,
+            verbose=verbose,
+        )
         results.append((result, audio_path))
 
     # Unload Whisper and VAD
@@ -219,7 +226,7 @@ def cli():
                         result["language"], device
                     )
                 print(">>Performing alignment...")
-                result = align(
+                result: AlignedTranscriptionResult = align(
                     result["segments"],
                     align_model,
                     align_metadata,

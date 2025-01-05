@@ -1,20 +1,19 @@
 import os
-from typing import List, Union, Optional, NamedTuple
-import time
+import warnings
+from typing import List, NamedTuple, Optional, Union
 
 import ctranslate2
 import faster_whisper
 import numpy as np
 import torch
 from faster_whisper.tokenizer import Tokenizer
-from faster_whisper.transcribe import (TranscriptionOptions,
-                                       get_ctranslate2_storage)
+from faster_whisper.transcribe import TranscriptionOptions, get_ctranslate2_storage
 from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 
 from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
-import whisperx.vads
-from .types import TranscriptionResult, SingleSegment
+from .types import SingleSegment, TranscriptionResult
+from .vad import VoiceActivitySegmentation, load_vad_model, merge_chunks
 
 
 def find_numeral_symbol_tokens(tokenizer):
@@ -108,11 +107,11 @@ class FasterWhisperPipeline(Pipeline):
 
     def __init__(
         self,
-        model,
-        vad,
+        model: WhisperModel,
+        vad: VoiceActivitySegmentation,
         vad_params: dict,
         options: NamedTuple,
-        tokenizer=None,
+        tokenizer: Optional[Tokenizer] = None,
         device: Union[int, str, "torch.device"] = -1,
         framework="pt",
         language: Optional[str] = None,
@@ -177,9 +176,9 @@ class FasterWhisperPipeline(Pipeline):
         inputs,
         num_workers: int,
         batch_size: int,
-        preprocess_params,
-        forward_params,
-        postprocess_params,
+        preprocess_params: dict,
+        forward_params: dict,
+        postprocess_params: dict,
     ):
         dataset = PipelineIterator(inputs, self.preprocess, preprocess_params)
         if "TOKENIZERS_PARALLELISM" not in os.environ:
@@ -201,7 +200,16 @@ class FasterWhisperPipeline(Pipeline):
         return final_iterator
 
     def transcribe(
-        self, audio: Union[str, np.ndarray], batch_size=None, num_workers=0, language=None, task=None, chunk_size=30, print_progress = False, combined_progress=False, verbose=False
+        self,
+        audio: Union[str, np.ndarray],
+        batch_size: Optional[int] = None,
+        num_workers=0,
+        language: Optional[str] = None,
+        task: Optional[str] = None,
+        chunk_size=30,
+        print_progress=False,
+        combined_progress=False,
+        verbose=False,
     ) -> TranscriptionResult:
 
         # ================ function start time =================
@@ -328,7 +336,7 @@ class FasterWhisperPipeline(Pipeline):
 
         return {"segments": segments, "language": language}
 
-    def detect_language(self, audio: np.ndarray):
+    def detect_language(self, audio: np.ndarray) -> str:
         if audio.shape[0] < N_SAMPLES:
             print(
                 "Warning: audio is shorter than 30s, language detection may be inaccurate."
@@ -350,22 +358,21 @@ class FasterWhisperPipeline(Pipeline):
 
 
 def load_model(
-    whisper_arch,
-    device,
+    whisper_arch: str,
+    device: str,
     device_index=0,
     compute_type="float16",
-    asr_options=None,
+    asr_options: Optional[dict] = None,
     language: Optional[str] = None,
-    vad_model=None,
-    vad_method=None,
-    vad_options=None,
+    vad_model: Optional[VoiceActivitySegmentation] = None,
+    vad_method: None,
+    vad_options: Optional[dict] = None,
     model: Optional[WhisperModel] = None,
     task="transcribe",
-    download_root=None,
+    download_root: Optional[str] = None,
     local_files_only=False,
     threads=4,
-):
-
+) -> FasterWhisperPipeline:
     """Load a Whisper model for inference.
     Args:
         whisper_arch: str - The name of the Whisper model to load.
@@ -462,15 +469,7 @@ def load_model(
                 vad_model = whisperx.vads.Pyannote(
             torch.device(device), use_auth_token=None, **default_vad_options
         )
-
-    # ============== End time ==============
-    end = time.time()
-    if prnt_duration:
-        print(
-            "================= Model loading time: %f seconds ================="
-            % (end - start)
-        )
-
+                
     return FasterWhisperPipeline(
         model=model,
         vad=vad_model,

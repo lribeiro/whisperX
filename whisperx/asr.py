@@ -8,7 +8,8 @@ import faster_whisper
 import numpy as np
 import torch
 from faster_whisper.tokenizer import Tokenizer
-from faster_whisper.transcribe import TranscriptionOptions, get_ctranslate2_storage
+from faster_whisper.transcribe import (TranscriptionOptions,
+                                       get_ctranslate2_storage)
 from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 

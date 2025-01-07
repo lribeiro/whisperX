@@ -324,17 +324,7 @@ class FasterWhisperPipeline(Pipeline):
 
         # revert suppressed tokens if suppress_numerals is enabled
         if self.suppress_numerals:
-            self.options = self.options._replace(
-                suppress_tokens=previous_suppress_tokens
-            )
-
-        # ============== End time ==============
-        end_transcribe = time.time()
-        if prnt_duration:
-            print(
-                "================= Transcription time: %f seconds ================="
-                % (end_transcribe - start_transcribe)
-            )
+            self.options = replace(self.options, suppress_tokens=previous_suppress_tokens)
 
         return {"segments": segments, "language": language}
 

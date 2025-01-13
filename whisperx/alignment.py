@@ -15,7 +15,13 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
 from .audio import SAMPLE_RATE, load_audio
 from .utils import interpolate_nans
-from .types import AlignedTranscriptionResult, SingleSegment, SingleAlignedSegment, SingleWordSegment
+from .types import (
+    AlignedTranscriptionResult,
+    SingleSegment,
+    SingleAlignedSegment,
+    SingleWordSegment,
+    SegmentData,
+)
 from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 
 PUNKT_ABBREVIATIONS = ['dr', 'vs', 'mr', 'mrs', 'prof']
@@ -133,7 +139,7 @@ def align(
     # 1. Preprocess to keep only characters in dictionary
     total_segments = len(transcript)
     # Store temporary processing values
-    segment_data = {}
+    segment_data: dict[int, SegmentData] = {}
     for sdx, segment in enumerate(transcript):
         # strip spaces at beginning / end, but keep track of the amount.
         if print_progress:

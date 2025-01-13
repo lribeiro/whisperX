@@ -26,8 +26,8 @@ class Vad:
          """
         curr_end = 0
         merged_segments = []
-        seg_idxs = []
-        speaker_idxs = []
+        seg_idxs: list[tuple]= []
+        speaker_idxs: list[Optional[str]] = []
 
         if len(segments) == 0:
             return merged_segments

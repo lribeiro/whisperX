@@ -1,6 +1,5 @@
 import os
-import warnings
-from typing import List, NamedTuple, Optional, Union
+from typing import List, Optional, Union
 from dataclasses import replace
 
 import ctranslate2
@@ -364,8 +363,8 @@ def load_model(
     compute_type="float16",
     asr_options: Optional[dict] = None,
     language: Optional[str] = None,
-    vad_model: Optional[VoiceActivitySegmentation] = None,
-    vad_method: str: "pyannote",
+    vad_model: Optional[Vad]= None,
+    vad_method: Optional[str] = None,
     vad_options: Optional[dict] = None,
     model: Optional[WhisperModel] = None,
     task="transcribe",

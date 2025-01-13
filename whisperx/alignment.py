@@ -207,7 +207,7 @@ def align(
             "clean_wdx": clean_wdx,
             "sentence_spans": sentence_spans
         }
-
+            
     aligned_segments: List[SingleAlignedSegment] = []
 
     # 2. Get prediction matrix from alignment model & align
